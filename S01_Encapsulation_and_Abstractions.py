@@ -13,4 +13,6 @@ if __name__ == '__main__':
     circle = Circle(10)
     print(circle.area())
 
+    import ipdb
+    ipdb.set_trace()
     print(circle._Circle__get_pi()) # Para invocar un método "privado" debemos invocar a la clase 
