@@ -1,9 +1,7 @@
-# 01. Encapsulation and Abstractions
-
-## Encapsulamiento
+# Encapsulamiento
 Uno de los pilares de la POO, se utiliza para ocultar los detalles de implementación y exponer únicamente la funcionalidad o atributos que el usuario requiere, ocultando los detalles internos de la logica requerida para generar el comportamiento o restringir los datos a los que se tiene acceso. Su objetivo es ocultar la complejidad y exponer únicamente lo esecial para el usuario.
 
-```
+```python
 class Circle:
     
     def __init__(self, radio: float):
@@ -39,5 +37,6 @@ Por ejemplo, invocamos al método **ipdb.set_tracer()** en la linea 17 y la ejec
 Desde acá podemos acceder a los método del objeto o presionar "c" para continuar con la ejecución del programa.
 
 
-## Abstracción
+
+
 
