@@ -36,7 +36,55 @@ Por ejemplo, invocamos al método **ipdb.set_tracer()** en la linea 17 y la ejec
 
 Desde acá podemos acceder a los método del objeto o presionar "c" para continuar con la ejecución del programa.
 
+## ¿Qué hace if __name__ == "__main__":?
+Permite **ejecutar código solo cuando el archivo se corre directamente**, y **no** cuando se importa como módulo en otro archivo.
 
+```py
+# archivo: ejemplo.py
 
+def saludar():
+    print("Hola desde la función saludar")
 
+if __name__ == "__main__":
+    print("Ejecutando ejemplo.py directamente")
+    saludar()
+
+```
+### Resultado al ejecutar directamente:
+```bash
+$ python ejemplo.py
+Ejecutando ejemplo.py directamente
+Hola desde la función saludar
+
+```
+### Resultado si se importa:
+```py
+# archivo: otro.py
+import ejemplo
+
+# No se imprime nada de la parte bajo if __name__ == "__main__"
+```
+
+### ¿Por qué es útil?
+1. Separación de responsabilidades
+    - Permite definir funciones, clases y lógica reutilizable sin ejecutar código accidentalmente al importar.
+
+2. Pruebas rápidas
+   - Puedes incluir tests o código de prueba sin afectar a otros módulos que usen tu archivo.
+
+3. Punto de entrada
+   - Funciona como el "main" de otros lenguajes como Java o C.
+
+## Recomendación (estilo profesional)
+Cuando desarrolles módulos en proyectos más grandes (como con Cosmic Python), siempre incluye esta estructura al final:
+```py
+def main():
+    # Lógica principal del script
+    ...
+
+if __name__ == "__main__":
+    main()
+
+```
+Esto **mejora la organización** y **facilita el testing**.
 
