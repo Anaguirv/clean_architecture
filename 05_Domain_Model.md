@@ -111,3 +111,173 @@ DDD y TDD van de la mano:
 - Primero se define el **comportamiento del dominio**.
 - Luego los implementas con clases y métodos.
 - Despues se escriben test que ejerciten  esos comportamientos  sin preocuparse aún por DBs o interfaces graficas.
+
+## En resumen
+- **DDD no es una arquitectura, sino una forma de pensar**.
+- Su meta es que el software modele fielmente **cómo funciona el negocio**.
+- Nos permite desarrollar sistemas más limpios, mantenibles y centrados en el valor real. 
+
+## Ejemplo práctico aplicando DDD al dominio de un restaurante
+Veras:
+1. Entidades (Platillo, Pedido).
+2. Objetos de valor (Money, OrderLine).
+3. Repositorio (interfaz y una implementación en memoria).
+4. Flujo de uso.
+
+### 1. Objetos de valor
+```py
+# domain/value_objects.py
+from dataclasses import dataclass
+
+@dataclass(frozen=True)
+class Money:
+    amount: float
+    currency: str = "MXN"
+
+    def __add__(self, other: "Money") -> "Money":
+        if self.currency != other.currency:
+            raise ValueError("No se pueden sumar distintas divisas")
+        return Money(self.amount + other.amount, self.currency)
+
+    def __repr__(self):
+        return f"{self.amount:.2f} {self.currency}"
+```
+### 2. Entidades
+```
+# domain/entities.py
+from uuid import uuid4
+from typing import List
+from .value_objects import Money, OrderLine
+
+class Platillo:
+    def __init__(self, platillo_id: str, nombre: str, precio: Money):
+        self.platillo_id = platillo_id
+        self.nombre = nombre
+        self.precio = precio
+
+    def __repr__(self):
+        return f"<Platillo {self.platillo_id}: {self.nombre} — {self.precio}>"
+
+```
+```py
+# domain/entities.py (continuación)
+from datetime import datetime
+
+class Pedido:
+    def __init__(self, pedido_id: str = None):
+        self.pedido_id = pedido_id or str(uuid4())
+        self._lineas: List[OrderLine] = []
+        self._estado: str = "pendiente"
+        self._timestamp = datetime.now()
+
+    def agregar_linea(self, line: OrderLine):
+        if line.cantidad <= 0:
+            raise ValueError("La cantidad debe ser positiva")
+        self._lineas.append(line)
+
+    def total(self, menu: dict) -> Money:
+        total = Money(0.0)
+        for line in self._lineas:
+            platillo = menu[line.platillo_id]
+            total += Money(platillo.precio.amount * line.cantidad, platillo.precio.currency)
+        return total
+
+    def confirmar(self):
+        if not self._lineas:
+            raise ValueError("No hay platillos en el pedido")
+        self._estado = "en preparación"
+
+    @property
+    def estado(self):
+        return self._estado
+
+    @property
+    def lineas(self):
+        return list(self._lineas)
+
+```
+
+### 3. Repositorio de pedidos
+```py
+# domain/repos.py
+from abc import ABC, abstractmethod
+from .entities import Pedido
+from typing import Optional
+
+class PedidoRepository(ABC):
+    @abstractmethod
+    def save(self, pedido: Pedido) -> None:
+        """Guardar o actualizar un pedido."""
+        pass
+
+    @abstractmethod
+    def get(self, pedido_id: str) -> Optional[Pedido]:
+        """Recuperar un pedido por su ID."""
+        pass
+
+```
+```py
+# infrastructure/in_memory_repo.py
+from domain.repos import PedidoRepository
+from domain.entities import Pedido
+from typing import Dict, Optional
+
+class InMemoryPedidoRepository(PedidoRepository):
+    def __init__(self):
+        self._storage: Dict[str, Pedido] = {}
+
+    def save(self, pedido: Pedido) -> None:
+        print(f"→ Repositorio: guardando pedido {pedido.pedido_id}")
+        self._storage[pedido.pedido_id] = pedido
+
+    def get(self, pedido_id: str) -> Optional[Pedido]:
+        print(f"→ Repositorio: recuperando pedido {pedido_id}")
+        return self._storage.get(pedido_id)
+
+```
+### 4. Flujo de la aplicación
+```py
+# app.py
+from domain.value_objects import Money, OrderLine
+from domain.entities import Platillo, Pedido
+from infrastructure.in_memory_repo import InMemoryPedidoRepository
+
+if __name__ == "__main__":
+    # 1. Definimos el menú (simulado)
+    menu = {
+        "p1": Platillo("p1", "Tacos al pastor", Money(75.0)),
+        "p2": Platillo("p2", "Agua de horchata", Money(25.0)),
+    }
+
+    # 2. Creamos repositorio e instanciamos un pedido
+    repo = InMemoryPedidoRepository()
+    pedido = Pedido()
+    print(f"→ Nuevo pedido con ID: {pedido.pedido_id}")
+
+    # 3. Cajero agrega líneas al pedido
+    pedido.agregar_linea(OrderLine("p1", 2))
+    pedido.agregar_linea(OrderLine("p2", 1))
+    print("→ Lineas del pedido:", pedido.lineas)
+
+    # 4. Confirmar y guardar
+    pedido.confirmar()
+    print("→ Estado tras confirmar:", pedido.estado)
+    repo.save(pedido)
+
+    # 5. Recuperar y calcular total
+    fetched = repo.get(pedido.pedido_id)
+    if fetched:
+        total = fetched.total(menu)
+        print(f"→ Total del pedido ({fetched.pedido_id}): {total}")
+
+```
+### ¿Qué hemos visto?
+- **Entidades**: Pedido y Platillo con identidad y comportamiento.
+
+- **Objetos de Valor**: Money y OrderLine encapsulan datos inmutables.
+
+- **Repositorio**: PedidoRepository como abstracción; InMemoryPedidoRepository como adaptador de infraestructura.
+
+- **Flujo**: la capa de aplicación (app.py) orquesta caso de uso “tomar pedido” sin conocer detalles de almacenamiento.
+
+> Con esto tenemos un esqueleto DDD listo para extender con más entidades, servicios de dominio y adaptadores (por ejemplo, persistencia en base de datos, mensajería a cocina, etc.).
