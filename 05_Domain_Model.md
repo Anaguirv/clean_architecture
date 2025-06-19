@@ -3,7 +3,9 @@
 Concepto utilizado para constuir un modelo de objeto que este muy nutrido de la logica de negocio haciendo uso del TDD.
 
 ## ¿Qué es el Dominio?
-En terminos simples:
+
+
+> [!IMPORTANT]
 > Es la parte del software que representa el conocimiento central del negocio que se esta modelando, es decir, la lógica y reglas fundamentales del sistema, **lo que hace que el software tenga sentido y funcione para su propósito real**.
 
 En Cosmic Python, los autores utilizan como ejemplo un sistema para almacenes de productos y envios (inventory and shipping system).
@@ -50,11 +52,13 @@ DDD nos invita a pensar en el comportamiento y no en los datos.
 Es una filosofia de diseño de software creada por Eric Evans en su libro *"Domain Driven Desgin: Tackling Complexity in heart of sofware"*
 
 Su objetivo principal es:
+
 > **Poner el dominio del negocio en el centro del diseño del software**, facilitando que los desarrolladores y expertos del negocio hablen el mismo idioma y trabajen juntos.
 >
 ## Principios fundamentales del DDD
 1. **Modelar el Dominio junto al experto**:
 El software debe representar fielmente como funciona el negocio. Por eso, los desarrolladores deben trabajar codo a codo con los expertos del dominio (ej. cajeros, cocineros, gerentes de restaurant) para entender los procesos reales.
+    > [!TIP]
     > "El código debe contar la misma historia que te cuenta el experto del negocio."
 
 2. **Lenguaje ubicuo**: Todo el equipo debe usar el **mismo vocabulario** cuando se refiere a elementos del sistema.
@@ -82,7 +86,7 @@ El software debe representar fielmente como funciona el negocio. Por eso, los de
     **No solo representes *qué* es algo, define *qué puede hacer* ese algo**
 
 **4. Separacion de responsabilidades**:
-DDD prompon diferenciar claramente las capas del sistema, para que cada una tenga un propósito único. Una forma de organizarlo es con la arquitectura limpia.
+DDD propone diferenciar claramente las capas del sistema, para que cada una tenga un propósito único. Una forma de organizarlo es con la arquitectura limpia.
 
 ```scss
 [ Interfaces / Infraestructura ] ← base de datos, APIs
@@ -92,7 +96,9 @@ DDD prompon diferenciar claramente las capas del sistema, para que cada una teng
 [ Dominio ] ← lógica de negocio pura (modelo rico)
 
 ```
+
 **5. Desacoplamiento de la insfraestructura**:
+> [!CAUTION]
 > "Si diseñamos primero la base de datos, todo queda aclopado a la base de datos "
 
 DDD recomienda **modelar primero el dominio**, y después usar patrones como **puertos y adaptadores** o **repositorios** para conectarlo a la infraestructura.
@@ -280,4 +286,4 @@ if __name__ == "__main__":
 
 - **Flujo**: la capa de aplicación (app.py) orquesta caso de uso “tomar pedido” sin conocer detalles de almacenamiento.
 
-> Con esto tenemos un esqueleto DDD listo para extender con más entidades, servicios de dominio y adaptadores (por ejemplo, persistencia en base de datos, mensajería a cocina, etc.).
+> Con esto tenemos  un esqueleto DDD listo para extender con más entidades, servicios de dominio y adaptadores (por ejemplo, persistencia en base de datos, mensajería a cocina, etc.).
